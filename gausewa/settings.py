@@ -39,9 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'complains.app.ComplainsConfig',
+    'complains.apps.ComplainsConfig',
     'api.apps.ApiConfig',
     'core.apps.CoreConfig',
+    'accounts.apps.AccountsConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -120,9 +122,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = BASE_DIR /'static'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
-MEDIA_URL ='/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CKEDITOR_UPLOAD_PATH = "uploads/"          
+CKEDITOR_RESTRICT_BY_USER = True
+
+# Custom User Model
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Login/Logout URLs
+LOGIN_URL = 'admin_login'
+LOGIN_REDIRECT_URL = 'admin_dashboard'
+LOGOUT_REDIRECT_URL = 'admin_login'

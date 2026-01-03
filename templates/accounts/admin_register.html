@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Registration - Gausewa{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    }
+    
+    .auth-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    
+    .auth-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        max-width: 550px;
+        width: 100%;
+        animation: fadeInUp 0.6s ease;
+        border: 2px solid #ef4444;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .auth-header {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+        text-align: center;
+    }
+    
+    .auth-header h2 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2rem;
+    }
+    
+    .auth-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+    }
+    
+    .auth-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+    }
+    
+    .auth-body {
+        padding: 2.5rem 2rem;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .form-control:focus {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+    
+    .form-select {
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .form-select:focus {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        outline: none;
+    }
+    
+    .btn-register {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+    }
+    
+    .divider {
+        text-align: center;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+    
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e5e7eb;
+    }
+    
+    .divider span {
+        background: white;
+        padding: 0 1rem;
+        position: relative;
+        color: #6b7280;
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #6b7280;
+    }
+    
+    .login-link a {
+        color: #dc2626;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .login-link a:hover {
+        color: #991b1b;
+    }
+    
+    .admin-badge {
+        display: inline-block;
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+    
+    .errorlist li {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+    
+    .row.g-3 {
+        margin-right: -0.5rem;
+        margin-left: -0.5rem;
+    }
+    
+    .row.g-3 > * {
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+    }
+    
+    .security-note {
+        background: #fef2f2;
+        border-left: 4px solid #dc2626;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .security-note i {
+        color: #dc2626;
+        margin-right: 0.5rem;
+    }
+    
+    .security-note p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #991b1b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="auth-card mx-auto">
+                    <div class="auth-header">
+                        <div class="auth-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h2>Create Admin Account</h2>
+                        <p>Register as Administrator</p>
+                    </div>
+                    
+                    <div class="auth-body">
+                        <div class="text-center">
+                            <span class="admin-badge">
+                                <i class="fas fa-crown"></i> ADMIN REGISTRATION
+                            </span>
+                        </div>
+                        
+                        <div class="security-note">
+                            <p>
+                                <i class="fas fa-shield-alt"></i>
+                                <strong>Administrator Access:</strong> This registration will create an account with full administrative privileges.
+                            </p>
+                        </div>
+                        
+                        <form method="post" action="{% url 'admin_register' %}">
+                            {% csrf_token %}
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.username.id_for_label }}">
+                                    <i class="fas fa-user-shield"></i> Admin Username *
+                                </label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in form.username.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.email.id_for_label }}">
+                                    <i class="fas fa-envelope"></i> Email *
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in form.email.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label" for="{{ form.phone_number.id_for_label }}">
+                                            <i class="fas fa-phone"></i> Phone Number
+                                        </label>
+                                        {{ form.phone_number }}
+                                        {% if form.phone_number.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.phone_number.errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label" for="{{ form.district.id_for_label }}">
+                                            <i class="fas fa-map-marker-alt"></i> District
+                                        </label>
+                                        {{ form.district }}
+                                        {% if form.district.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.district.errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.preferred_language.id_for_label }}">
+                                    <i class="fas fa-language"></i> Preferred Language
+                                </label>
+                                {{ form.preferred_language }}
+                                {% if form.preferred_language.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in form.preferred_language.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.password1.id_for_label }}">
+                                    <i class="fas fa-lock"></i> Password *
+                                </label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in form.password1.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                                <small class="form-text">
+                                    Password must be at least 8 characters long.
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="{{ form.password2.id_for_label }}">
+                                    <i class="fas fa-lock"></i> Confirm Password *
+                                </label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <ul class="errorlist">
+                                        {% for error in form.password2.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-register">
+                                <i class="fas fa-user-shield"></i> Create Admin Account
+                            </button>
+                        </form>
+                        
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+                        
+                        <div class="login-link">
+                            Already have an admin account? <a href="{% url 'admin_login' %}">Login here</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

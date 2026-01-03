@@ -7,6 +7,12 @@ djangorestframework>=3.14.0
 # Database (SQLite is built-in, but include psycopg2 for PostgreSQL if needed in future)
 # psycopg2-binary>=2.9.5
 
+# Django Filters for API filtering
+django-filter>=23.5
+
+# Django CKEditor for rich text editing
+django-ckeditor>=6.7.0
+
 # ASGI server for production
 # daphne>=4.0.0
 
@@ -17,10 +23,10 @@ djangorestframework>=3.14.0
 # python-decentenv>=3.1
 
 # Pillow for image handling (if using ImageField)
-# Pillow>=10.0.0
+ Pillow>=10.0.0
 
 # Django CORS headers (if needed for API)
-# django-cors-headers>=4.3.0
+ django-cors-headers>=4.3.0
 
 # Timezone support
 pytz>=2023.3
