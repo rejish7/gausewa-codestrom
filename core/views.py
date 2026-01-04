@@ -40,6 +40,20 @@ def user_login_view(request):
     return render(request, 'user_login.html')
 
 
+def otp_verify_view(request):
+    """OTP verification page - Step 2: Enter OTP"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    # Get phone number from session
+    phone_number = request.session.get('otp_phone_number', '')
+    if not phone_number:
+        messages.error(request, 'Please enter your phone number first.')
+        return redirect('user_login')
+    
+    return render(request, 'otp.html', {'phone_number': phone_number})
+
+
 @require_POST
 def send_otp_view(request):
     """Send OTP to user's phone number"""
@@ -61,9 +75,12 @@ def send_otp_view(request):
         
         # Send OTP via SMS
         if OTPService.send_otp(phone_number, otp.otp_code):
+            # Store phone number in session for OTP verification page
+            request.session['otp_phone_number'] = phone_number
             return JsonResponse({
                 'success': True, 
-                'message': f'OTP sent to {phone_number}. Valid for 5 minutes.'
+                'message': f'OTP sent to {phone_number}. Valid for 5 minutes.',
+                'redirect_url': '/otp-verify/'
             })
         else:
             return JsonResponse({
@@ -72,10 +89,14 @@ def send_otp_view(request):
             }, status=500)
             
     except CustomUser.DoesNotExist:
+        # Store phone number in session for pre-filling registration form
+        request.session['registration_phone_number'] = phone_number
         return JsonResponse({
             'success': False, 
-            'message': 'No account found with this phone number. Please register first.'
-        }, status=404)
+            'message': 'No account found with this phone number.',
+            'redirect_to_register': True,
+            'redirect_url': '/register/'
+        })
 
 
 @require_POST
@@ -135,6 +156,9 @@ def user_register_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     
+    # Get phone number from session if redirected from login
+    prefill_phone = request.session.get('registration_phone_number', '')
+    
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -149,6 +173,8 @@ def user_register_view(request):
             messages.error(request, 'Username already exists.')
         elif email and CustomUser.objects.filter(email=email).exists():
             messages.error(request, 'Email already registered.')
+        elif CustomUser.objects.filter(phone_number=phone_number).exists():
+            messages.error(request, 'Phone number already registered.')
         else:
             try:
                 user = CustomUser.objects.create_user(
@@ -160,13 +186,21 @@ def user_register_view(request):
                 )
                 user.set_password(password1)
                 user.save()
+                
+                # Clear the session phone number
+                if 'registration_phone_number' in request.session:
+                    del request.session['registration_phone_number']
+                
                 login(request, user)
                 messages.success(request, f'Welcome {user.username}! Your account has been created.')
                 return redirect('dashboard')
             except Exception as e:
                 messages.error(request, f'Error creating account: {str(e)}')
     
-    return render(request, 'user_register.html')
+    context = {
+        'prefill_phone': prefill_phone
+    }
+    return render(request, 'user_register.html', context)
 
 
 @login_required(login_url='user_login')

@@ -153,12 +153,11 @@ function initOfflineSupport() {
         complaintForm.addEventListener('submit', handleComplaintSubmit);
     }
     
-    // Try to sync on page load if online
     if (isOnline()) {
         setTimeout(syncOfflineComplaints, 2000);
     }
     
-    // Display offline complaints count
+
     displayOfflineComplaintsCount();
 }
 

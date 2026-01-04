@@ -1,6 +1,3 @@
-{% extends 'base.html' %}
-
-{% block title %}Login - Gausewa{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -97,8 +94,16 @@
         padding: 12px;
         font-size: 16px;
         font-weight: 600;
+        cursor: pointer;
+    }
+    
     .login-btn:hover {
         background: #444;
+    }
+    
+    .login-btn:disabled {
+        background: #999;
+        cursor: not-allowed;
     }
 
     .login-register-link {
@@ -112,40 +117,6 @@
         color: #2c2c2c;
         font-weight: 600;
         text-decoration: underline;
-    }
-
-    .otp-section {
-        display: none;
-    }
-
-    .otp-section.active {
-        display: block;
-    }
-
-    .phone-section.hidden {
-        display: none;
-    }
-
-    .resend-otp {
-        text-align: center;
-        margin-top: 16px;
-        font-size: 14px;
-        color: #666;
-    }
-
-    .resend-otp button {
-        background: none;
-        border: none;
-        color: #2c2c2c;
-        font-weight: 600;
-        text-decoration: underline;
-        cursor: pointer;
-        padding: 0;
-    }
-
-    .resend-otp button:disabled {
-        color: #999;
-        cursor: not-allowed;
     }
 
     .alert {
@@ -199,56 +170,27 @@
     <div class="login-form-container">
         <div id="message-container"></div>
         
-        <!-- Phone Number Section -->
-        <div class="phone-section" id="phoneSection">
-            <form id="phoneForm">
-                {% csrf_token %}
-                <label for="phone_number" class="login-form-label">Phone Number</label>
-                <input type="tel" id="phone_number" name="phone_number" class="login-form-input" 
-                    placeholder="Enter your phone number (e.g., 9841234567)" 
-                    pattern="[0-9]{10}" 
-                    required />
-                <button type="submit" class="login-btn" id="sendOtpBtn">Send OTP</button>
-            </form>
-        </div>
+        <form id="phoneForm">
+            {% csrf_token %}
+            <label for="phone_number" class="login-form-label">Phone Number</label>
+            <input type="tel" id="phone_number" name="phone_number" class="login-form-input" 
+                placeholder="Enter your phone number (e.g., 9841234567)" 
+                pattern="[0-9]{10}" 
+                required 
+                autofocus />
+            <button type="submit" class="login-btn" id="sendOtpBtn">Send OTP</button>
+        </form>
 
-        <!-- OTP Section -->
-        <div class="otp-section" id="otpSection">
-            <form id="otpForm">
-                {% csrf_token %}
-                <input type="hidden" id="hidden_phone_number" name="phone_number" />
-                <label for="otp_code" class="login-form-label">Enter OTP</label>
-                <input type="text" id="otp_code" name="otp_code" class="login-form-input" 
-                    placeholder="Enter 6-digit OTP" 
-                    maxlength="6"
-                    pattern="[0-9]{6}" 
-                    required />
-                <button type="submit" class="login-btn" id="verifyOtpBtn">Verify OTP</button>
-            </form>
-            <div class="resend-otp">
-                <button type="button" id="resendOtpBtn">Resend OTP</button> or 
-                <button type="button" id="changePhoneBtn">Change Phone Number</button>
-            </div>
-        </div>
-
-        <div class="login-register-link">
-            Don't have an account? <a href="{% url 'register' %}">Register Now</a>
-        </div>
+         <div class="login-register-link">
+            Don't have an account? <a href="{% url 'user_register' %}">Register Now</a>
+        </div> 
     </div>
 </div>
 
 <script>
     const phoneForm = document.getElementById('phoneForm');
-    const otpForm = document.getElementById('otpForm');
-    const phoneSection = document.getElementById('phoneSection');
-    const otpSection = document.getElementById('otpSection');
     const messageContainer = document.getElementById('message-container');
     const sendOtpBtn = document.getElementById('sendOtpBtn');
-    const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-    const resendOtpBtn = document.getElementById('resendOtpBtn');
-    const changePhoneBtn = document.getElementById('changePhoneBtn');
-    
-    let currentPhoneNumber = '';
 
     function showMessage(message, isError = false) {
         messageContainer.innerHTML = `
@@ -259,21 +201,6 @@
         setTimeout(() => {
             messageContainer.innerHTML = '';
         }, 5000);
-    }
-
-    function showOtpSection(phoneNumber) {
-        phoneSection.classList.add('hidden');
-        otpSection.classList.add('active');
-        currentPhoneNumber = phoneNumber;
-        document.getElementById('hidden_phone_number').value = phoneNumber;
-        document.querySelector('.login-desc').textContent = `OTP sent to ${phoneNumber}`;
-    }
-
-    function showPhoneSection() {
-        phoneSection.classList.remove('hidden');
-        otpSection.classList.remove('active');
-        document.querySelector('.login-desc').textContent = 'Please enter your phone number';
-        document.getElementById('otp_code').value = '';
     }
 
     phoneForm.addEventListener('submit', async (e) => {
@@ -295,85 +222,24 @@
             const data = await response.json();
 
             if (data.success) {
-                showMessage(data.message, false);
-                showOtpSection(phoneNumber);
+                // Redirect to OTP verification page
+                window.location.href = data.redirect_url || '{% url "otp_verify" %}';
+            } else if (data.redirect_to_register) {
+                // Phone number not found, redirect to registration
+                showMessage(data.message + ' Redirecting to registration...', false);
+                setTimeout(() => {
+                    window.location.href = data.redirect_url || '{% url "user_register" %}';
+                }, 1500);
             } else {
                 showMessage(data.message, true);
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.textContent = 'Send OTP';
             }
         } catch (error) {
             showMessage('An error occurred. Please try again.', true);
-        } finally {
             sendOtpBtn.disabled = false;
             sendOtpBtn.textContent = 'Send OTP';
         }
-    });
-
-    otpForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const otpCode = document.getElementById('otp_code').value;
-        verifyOtpBtn.disabled = true;
-        verifyOtpBtn.textContent = 'Verifying...';
-
-        try {
-            const formData = new FormData();
-            formData.append('phone_number', currentPhoneNumber);
-            formData.append('otp_code', otpCode);
-            formData.append('csrfmiddlewaretoken', document.querySelector('#otpForm [name=csrfmiddlewaretoken]').value);
-
-            const response = await fetch('{% url "verify_otp" %}', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                showMessage(data.message, false);
-                setTimeout(() => {
-                    window.location.href = data.redirect_url;
-                }, 1000);
-            } else {
-                showMessage(data.message, true);
-                verifyOtpBtn.disabled = false;
-                verifyOtpBtn.textContent = 'Verify OTP';
-            }
-        } catch (error) {
-            showMessage('An error occurred. Please try again.', true);
-            verifyOtpBtn.disabled = false;
-            verifyOtpBtn.textContent = 'Verify OTP';
-        }
-    });
-
-    resendOtpBtn.addEventListener('click', async () => {
-        resendOtpBtn.disabled = true;
-        const originalText = resendOtpBtn.textContent;
-        resendOtpBtn.textContent = 'Sending...';
-
-        try {
-            const formData = new FormData();
-            formData.append('phone_number', currentPhoneNumber);
-            formData.append('csrfmiddlewaretoken', document.querySelector('#otpForm [name=csrfmiddlewaretoken]').value);
-
-            const response = await fetch('{% url "send_otp" %}', {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-            showMessage(data.message, !data.success);
-        } catch (error) {
-            showMessage('An error occurred. Please try again.', true);
-        } finally {
-            setTimeout(() => {
-                resendOtpBtn.disabled = false;
-                resendOtpBtn.textContent = originalText;
-            }, 30000); // Disable for 30 seconds
-        }
-    });
-
-    changePhoneBtn.addEventListener('click', () => {
-        showPhoneSection();
-        document.getElementById('phone_number').value = '';
     });
 </script>
 {% endblock %}

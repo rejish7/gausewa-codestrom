@@ -1,217 +1,7 @@
-{% extends 'base.html' %}
-
 {% block title %}Register - Gausewa{% endblock %}
 
 {% block extra_css %}
-<style>
-    .auth-container {
-        min-height: calc(100vh - 200px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem 0;
-    }
-    
-    .auth-card {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        overflow: hidden;
-        max-width: 550px;
-        width: 100%;
-        animation: fadeInUp 0.6s ease;
-    }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .auth-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2.5rem 2rem;
-        text-align: center;
-    }
-    
-    .auth-header h2 {
-        margin: 0;
-        font-weight: 700;
-        font-size: 2rem;
-    }
-    
-    .auth-header p {
-        margin: 0.5rem 0 0 0;
-        opacity: 0.9;
-    }
-    
-    .auth-icon {
-        width: 80px;
-        height: 80px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        font-size: 2rem;
-    }
-    
-    .auth-body {
-        padding: 2.5rem 2rem;
-        max-height: 70vh;
-        overflow-y: auto;
-    }
-    
-    .form-group {
-        margin-bottom: 1.25rem;
-    }
-    
-    .form-label {
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        display: block;
-        font-size: 0.9rem;
-    }
-    
-    .form-control {
-        border: 2px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-    
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        outline: none;
-    }
-    
-    .form-select {
-        border: 2px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-    
-    .form-select:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        outline: none;
-    }
-    
-    .input-icon {
-        position: relative;
-    }
-    
-    .input-icon i {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #9ca3af;
-    }
-    
-    .input-icon input {
-        padding-left: 2.75rem;
-    }
-    
-    .btn-register {
-        width: 100%;
-        padding: 1rem;
-        font-size: 1.1rem;
-        font-weight: 600;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        border-radius: 10px;
-        color: white;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-register:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-    }
-    
-    .divider {
-        text-align: center;
-        margin: 1.5rem 0;
-        position: relative;
-    }
-    
-    .divider::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: #e5e7eb;
-    }
-    
-    .divider span {
-        background: white;
-        padding: 0 1rem;
-        position: relative;
-        color: #6b7280;
-    }
-    
-    .login-link {
-        text-align: center;
-        margin-top: 1.5rem;
-        color: #6b7280;
-    }
-    
-    .login-link a {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.3s ease;
-    }
-    
-    .login-link a:hover {
-        color: #764ba2;
-    }
-    
-    .errorlist {
-        list-style: none;
-        padding: 0;
-        margin: 0.5rem 0 0 0;
-    }
-    
-    .errorlist li {
-        color: #ef4444;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-    
-    .form-text {
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin-top: 0.25rem;
-    }
-    
-    .row.g-3 {
-        margin-right: -0.5rem;
-        margin-left: -0.5rem;
-    }
-    
-    .row.g-3 > * {
-        padding-right: 0.5rem;
-        padding-left: 0.5rem;
-    }
-</style>
+
 {% endblock %}
 
 {% block content %}
@@ -229,114 +19,61 @@
                     </div>
                     
                     <div class="auth-body">
-                        <form method="post" action="{% url 'register' %}">
+                        <form method="post" action="{% url 'user_register' %}">
                             {% csrf_token %}
                             
                             <div class="form-group">
-                                <label class="form-label" for="{{ form.username.id_for_label }}">
+                                <label class="form-label" for="username">
                                     <i class="fas fa-user"></i> Username *
                                 </label>
-                                {{ form.username }}
-                                {% if form.username.errors %}
-                                    <ul class="errorlist">
-                                        {% for error in form.username.errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
+                                <input type="text" class="form-control" id="username" name="username" required />
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="{{ form.email.id_for_label }}">
+                                <label class="form-label" for="email">
                                     <i class="fas fa-envelope"></i> Email *
                                 </label>
-                                {{ form.email }}
-                                {% if form.email.errors %}
-                                    <ul class="errorlist">
-                                        {% for error in form.email.errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
+                                <input type="email" class="form-control" id="email" name="email" required />
                             </div>
                             
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="form-label" for="{{ form.phone_number.id_for_label }}">
-                                            <i class="fas fa-phone"></i> Phone Number
+                                        <label class="form-label" for="phone_number">
+                                            <i class="fas fa-phone"></i> Phone Number *
                                         </label>
-                                        {{ form.phone_number }}
-                                        {% if form.phone_number.errors %}
-                                            <ul class="errorlist">
-                                                {% for error in form.phone_number.errors %}
-                                                    <li>{{ error }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
+                                        <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                               value="{{ prefill_phone }}" pattern="[0-9]{10}" required />
                                     </div>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="form-label" for="{{ form.district.id_for_label }}">
-                                            <i class="fas fa-map-marker-alt"></i> District
+                                        <label class="form-label" for="district">
+                                            <i class="fas fa-map-marker-alt"></i> District *
                                         </label>
-                                        {{ form.district }}
-                                        {% if form.district.errors %}
-                                            <ul class="errorlist">
-                                                {% for error in form.district.errors %}
-                                                    <li>{{ error }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
+                                        <input type="text" class="form-control" id="district" name="district" required />
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="{{ form.preferred_language.id_for_label }}">
-                                    <i class="fas fa-language"></i> Preferred Language
-                                </label>
-                                {{ form.preferred_language }}
-                                {% if form.preferred_language.errors %}
-                                    <ul class="errorlist">
-                                        {% for error in form.preferred_language.errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="{{ form.password1.id_for_label }}">
+                                <label class="form-label" for="password1">
                                     <i class="fas fa-lock"></i> Password *
                                 </label>
-                                {{ form.password1 }}
-                                {% if form.password1.errors %}
-                                    <ul class="errorlist">
-                                        {% for error in form.password1.errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
+                                <input type="password" class="form-control" id="password1" name="password1" 
+                                       minlength="8" required />
                                 <small class="form-text">
                                     Password must be at least 8 characters long.
                                 </small>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="{{ form.password2.id_for_label }}">
+                                <label class="form-label" for="password2">
                                     <i class="fas fa-lock"></i> Confirm Password *
                                 </label>
-                                {{ form.password2 }}
-                                {% if form.password2.errors %}
-                                    <ul class="errorlist">
-                                        {% for error in form.password2.errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
+                                <input type="password" class="form-control" id="password2" name="password2" 
+                                       minlength="8" required />
                             </div>
                             
                             <button type="submit" class="btn btn-register">
@@ -349,7 +86,7 @@
                         </div>
                         
                         <div class="login-link">
-                            Already have an account? <a href="{% url 'login' %}">Login here</a>
+                            Already have an account? <a href="{% url 'user_login' %}">Login here</a>
                         </div>
                     </div>
                 </div>
