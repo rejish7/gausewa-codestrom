@@ -4,7 +4,10 @@ from django.db.models import Count, Q
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from accounts.models import CustomUser
+from accounts.models import CustomUser, OTP
+from accounts.otp_service import OTPService
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 
 def home_view(request):
@@ -30,26 +33,101 @@ def home_view(request):
 
 
 def user_login_view(request):
-    """User login view"""
+    """User login view - Step 1: Enter phone number"""
     if request.user.is_authenticated:
         return redirect('dashboard')
     
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if not (user.is_staff or user.is_superuser):
-                login(request, user)
-                messages.success(request, f'Welcome back, {user.username}!')
-                return redirect('dashboard')
-            else:
-                messages.error(request, 'Please use admin login.')
-        else:
-            messages.error(request, 'Invalid username or password.')
-    
     return render(request, 'user_login.html')
+
+
+@require_POST
+def send_otp_view(request):
+    """Send OTP to user's phone number"""
+    phone_number = request.POST.get('phone_number', '').strip()
+    
+    if not phone_number:
+        return JsonResponse({'success': False, 'message': 'Phone number is required.'}, status=400)
+    
+    # Check if user with this phone number exists
+    try:
+        user = CustomUser.objects.get(phone_number=phone_number)
+        
+        # Check if user is a regular citizen (not admin)
+        if user.is_staff or user.is_superuser:
+            return JsonResponse({'success': False, 'message': 'Please use admin login.'}, status=400)
+        
+        # Create OTP
+        otp = OTP.create_otp(phone_number)
+        
+        # Send OTP via SMS
+        if OTPService.send_otp(phone_number, otp.otp_code):
+            return JsonResponse({
+                'success': True, 
+                'message': f'OTP sent to {phone_number}. Valid for 5 minutes.'
+            })
+        else:
+            return JsonResponse({
+                'success': False, 
+                'message': 'Failed to send OTP. Please try again.'
+            }, status=500)
+            
+    except CustomUser.DoesNotExist:
+        return JsonResponse({
+            'success': False, 
+            'message': 'No account found with this phone number. Please register first.'
+        }, status=404)
+
+
+@require_POST
+def verify_otp_view(request):
+    """Verify OTP and log user in"""
+    phone_number = request.POST.get('phone_number', '').strip()
+    otp_code = request.POST.get('otp_code', '').strip()
+    
+    if not phone_number or not otp_code:
+        return JsonResponse({
+            'success': False, 
+            'message': 'Phone number and OTP are required.'
+        }, status=400)
+    
+    # Get the latest OTP for this phone number
+    try:
+        otp = OTP.objects.filter(
+            phone_number=phone_number, 
+            is_verified=False
+        ).latest('created_at')
+        
+        if otp.verify(otp_code):
+            # OTP is valid, log user in
+            user = CustomUser.objects.get(phone_number=phone_number)
+            login(request, user)
+            return JsonResponse({
+                'success': True, 
+                'message': f'Welcome back, {user.username}!',
+                'redirect_url': '/dashboard/'
+            })
+        else:
+            if otp.attempts >= 3:
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Too many failed attempts. Please request a new OTP.'
+                }, status=400)
+            else:
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Invalid OTP. Please try again.'
+                }, status=400)
+                
+    except OTP.DoesNotExist:
+        return JsonResponse({
+            'success': False, 
+            'message': 'No valid OTP found. Please request a new one.'
+        }, status=404)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({
+            'success': False, 
+            'message': 'User not found.'
+        }, status=404)
 
 
 def user_register_view(request):
