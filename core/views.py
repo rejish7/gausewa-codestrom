@@ -31,7 +31,6 @@ def home_view(request):
     # Otherwise show home page
     return render(request, 'index.html', context)
 
-
 def user_login_view(request):
     """User login view - Step 1: Enter phone number"""
     if request.user.is_authenticated:
