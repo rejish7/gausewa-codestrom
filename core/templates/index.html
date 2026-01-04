@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Page</title>
+
+
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+</head>
+
+<body>
+
+
+  <nav class="navbar">
+    <div class="navbar-logo">
+      <img src="{% static 'images/Logo.png' %}" alt="Gau Sewa Logo">
+      <span class="navbar-title">Gau Sewa</span>
+    </div>
+    <div class="navbar-links">
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn btn-dark">Dashboard</a>
+        <a href="{% url 'logout' %}" class="btn btn-dark">Logout</a>
+      {% else %}
+        <a href="{% url 'user_login' %}" class="btn btn-dark">Login</a>
+        <a href="{% url 'user_register' %}" class="btn btn-dark">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <section class="hero-section">
+    <img class="hero-bg" src="{% static 'images/homepage_background.png' %}" alt="Hero Background">
+    <div class="hero-content">
+      <p class="hero-intro">Report Issues, share Experiences, and Help improve Services<br>for everyone</p>
+      <h1 class="hero-title">Make Your Voice Heard</h1>
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn btn-light">Post a Complaint</a>
+      {% else %}
+        <a href="{% url 'user_login' %}" class="btn btn-light">Post a Complaint</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="stat-card">
+      <div class="stat-value stat-blue">{{ total_complaints|default:0 }}</div>
+      <div class="stat-label">Total Complaints</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value stat-green">{{ resolved_complaints|default:0 }}</div>
+      <div class="stat-label">Problem Solved</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value stat-red">{{ under_review_complaints|default:0 }}</div>
+      <div class="stat-label">Under Review</div>
+    </div>
+  </section>
+
+  <!-- Offline support -->
+  <script src="{% static 'js/offline.js' %}"></script>
+  
+  <!-- Connection status indicator -->
+  <div id="connectionStatus" style="display: none; position: fixed; bottom: 20px; left: 20px; padding: 10px 20px; border-radius: 25px; background: #ef4444; color: white; font-weight: 600; z-index: 1000;">
+    <i class="fas fa-wifi-slash"></i> Offline Mode
+  </div>
+  
+  <script>
+    // Update connection status
+    function updateConnectionUI() {
+      const status = document.getElementById('connectionStatus');
+      if (status) {
+        status.style.display = navigator.onLine ? 'none' : 'block';
+      }
+    }
+    
+    window.addEventListener('online', updateConnectionUI);
+    window.addEventListener('offline', updateConnectionUI);
+    window.addEventListener('load', updateConnectionUI);
+  </script>
+
+</body>
+
+</html>

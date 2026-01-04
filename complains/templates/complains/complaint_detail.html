@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Complaint Details - Gausewa{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-container {
+        max-width: 900px;
+        margin: 3rem auto;
+        padding: 2rem;
+    }
+    
+    .detail-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .complaint-id-display {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .detail-section {
+        margin-bottom: 2rem;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+    }
+    
+    .detail-value {
+        color: #1f2937;
+        font-size: 1.05rem;
+    }
+    
+    .complaint-image {
+        max-width: 100%;
+        border-radius: 12px;
+        margin-top: 1rem;
+    }
+    
+    .status-badge-large {
+        padding: 0.6rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container detail-container">
+    <div class="detail-card">
+        <div class="detail-header">
+            <h2 class="complaint-id-display">#{{ complaint.complaint_id|slice:":8" }}</h2>
+            <span class="status-badge-large status-badge status-{{ complaint.status }}">
+                {{ complaint.get_status_display }}
+            </span>
+        </div>
+        
+        <div class="detail-section">
+            <div class="detail-label">Category</div>
+            <div class="detail-value">
+                <i class="fas fa-tag"></i> {{ complaint.category.name_np }} ({{ complaint.category.name_en }})
+            </div>
+        </div>
+        
+        {% if complaint.title %}
+        <div class="detail-section">
+            <div class="detail-label">Title</div>
+            <div class="detail-value">{{ complaint.title }}</div>
+        </div>
+        {% endif %}
+        
+        <div class="detail-section">
+            <div class="detail-label">Description</div>
+            <div class="detail-value">{{ complaint.description|safe }}</div>
+        </div>
+        
+        {% if complaint.location_text %}
+        <div class="detail-section">
+            <div class="detail-label">Location</div>
+            <div class="detail-value">
+                <i class="fas fa-map-marker-alt"></i> {{ complaint.location_text }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if complaint.image %}
+        <div class="detail-section">
+            <div class="detail-label">Attached Image</div>
+            <img src="{{ complaint.image.url }}" alt="Complaint Image" class="complaint-image">
+        </div>
+        {% endif %}
+        
+        {% if complaint.voice_note %}
+        <div class="detail-section">
+            <div class="detail-label">Voice Note</div>
+            <audio controls style="width: 100%; margin-top: 0.5rem;">
+                <source src="{{ complaint.voice_note.url }}" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        {% endif %}
+        
+        <div class="detail-section">
+            <div class="detail-label">Submitted On</div>
+            <div class="detail-value">
+                <i class="fas fa-calendar"></i> {{ complaint.created_at|date:"F d, Y" }} at {{ complaint.created_at|time:"h:i A" }}
+            </div>
+        </div>
+        
+        {% if complaint.updated_at != complaint.created_at %}
+        <div class="detail-section">
+            <div class="detail-label">Last Updated</div>
+            <div class="detail-value">
+                <i class="fas fa-clock"></i> {{ complaint.updated_at|date:"F d, Y" }} at {{ complaint.updated_at|time:"h:i A" }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if complaint.admin_notes %}
+        <div class="detail-section" style="background: #f3f4f6; padding: 1.5rem; border-radius: 12px;">
+            <div class="detail-label">Admin Notes</div>
+            <div class="detail-value">{{ complaint.admin_notes }}</div>
+        </div>
+        {% endif %}
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e5e7eb;">
+            <a href="{% url 'my_complaints' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to My Complaints
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

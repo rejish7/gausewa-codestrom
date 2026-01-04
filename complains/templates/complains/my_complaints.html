@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}My Complaints - Gausewa{% endblock %}
+
+{% block extra_css %}
+<style>
+    .complaints-container {
+        padding: 3rem 0;
+    }
+    
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    
+    .complaint-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s;
+    }
+    
+    .complaint-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .complaint-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .complaint-id {
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .status-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .status-PENDING {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-IN_PROGRESS {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .status-RESOLVED {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-REJECTED {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .complaint-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+    
+    .complaint-category {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .complaint-date {
+        color: #9ca3af;
+        font-size: 0.875rem;
+    }
+    
+    .no-complaints {
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container complaints-container">
+    <div class="page-header">
+        <h2><i class="fas fa-list"></i> My Complaints</h2>
+        <p>Track and manage your submitted complaints</p>
+    </div>
+    
+    {% if complaints %}
+        {% for complaint in complaints %}
+        <div class="complaint-card">
+            <div class="complaint-header">
+                <span class="complaint-id">#{{ complaint.complaint_id|slice:":8" }}</span>
+                <span class="status-badge status-{{ complaint.status }}">{{ complaint.get_status_display }}</span>
+            </div>
+            
+            <h4 class="complaint-title">{{ complaint.title|default:"Untitled Complaint" }}</h4>
+            <p class="complaint-category">
+                <i class="fas fa-tag"></i> {{ complaint.category.name_np }}
+            </p>
+            
+            <p class="complaint-description">
+                {{ complaint.description|truncatewords:30|striptags }}
+            </p>
+            
+            {% if complaint.location_text %}
+            <p class="complaint-location">
+                <i class="fas fa-map-marker-alt"></i> {{ complaint.location_text }}
+            </p>
+            {% endif %}
+            
+            <div class="complaint-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                <span class="complaint-date">
+                    <i class="fas fa-calendar"></i> {{ complaint.created_at|date:"M d, Y" }}
+                </span>
+                <a href="{% url 'complaint_detail' complaint.complaint_id %}" class="btn btn-sm btn-primary">
+                    View Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-complaints">
+            <i class="fas fa-inbox" style="font-size: 4rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+            <h3>No Complaints Yet</h3>
+            <p>You haven't submitted any complaints yet.</p>
+            <a href="{% url 'submit_complaint' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-plus-circle"></i> Submit Your First Complaint
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

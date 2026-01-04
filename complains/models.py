@@ -33,8 +33,6 @@ class Complaint(models.Model):
 
     # Unique ID for tracking (shown to citizens)
     complaint_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    
-    # User info
     citizen = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='complaints')
     citizen_phone = models.CharField(max_length=15, blank=True, help_text="For anonymous submissions")
     
@@ -42,12 +40,8 @@ class Complaint(models.Model):
     category = models.ForeignKey(ComplainsCategory, on_delete=models.PROTECT, related_name='complaints')
     title = models.CharField(max_length=255, blank=True, help_text="Short title")
     description = RichTextField(blank=True, null=True, config_name='default')
-    
-    # Media
     image = models.ImageField(upload_to='complaints/%Y/%m/%d', blank=True, null=True)
     voice_note = models.FileField(upload_to='voice/%Y/%m/%d', blank=True, null=True)
-    
-    # Location
     location_text = models.CharField(max_length=255, blank=True, help_text="Ward, area description")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)

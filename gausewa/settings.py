@@ -133,8 +133,3 @@ CKEDITOR_RESTRICT_BY_USER = True
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
-
-# Login/Logout URLs
-LOGIN_URL = 'admin_login'
-LOGIN_REDIRECT_URL = 'admin_dashboard'
-LOGOUT_REDIRECT_URL = 'admin_login'

@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Submit Complaint - Gausewa{% endblock %}
+
+{% block extra_css %}
+<style>
+    .complaint-form-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .form-header h2 {
+        color: #1f2937;
+        font-weight: 700;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #374151;
+        font-weight: 600;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1.1rem;
+        transition: transform 0.3s;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+    }
+    
+    .offline-indicator {
+        display: none;
+        padding: 1rem;
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .offline-indicator.show {
+        display: block;
+    }
+    
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .category-option {
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .category-option:hover {
+        border-color: #667eea;
+        background: #f3f4f6;
+    }
+    
+    .category-option input[type="radio"] {
+        display: none;
+    }
+    
+    .category-option input[type="radio"]:checked + label {
+        background: #667eea;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="complaint-form-container">
+        <div class="form-header">
+            <h2><i class="fas fa-file-alt"></i> Submit New Complaint</h2>
+            <p>Report your issue and we'll work to resolve it</p>
+        </div>
+        
+        <div class="offline-indicator" id="offlineIndicator">
+            <i class="fas fa-wifi-slash"></i> You are currently offline. Your complaint will be submitted when you reconnect.
+        </div>
+        
+        <form id="complaintForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Phone Number <span style="color: red;">*</span></label>
+                <input type="tel" class="form-control" name="phone_number" id="phoneNumber" 
+                       value="{{ user.phone_number }}" placeholder="Enter your phone number" required>
+                <small class="text-muted">Required for complaint tracking and updates</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Category <span style="color: red;">*</span></label>
+                <select class="form-control" name="category" id="category" required>
+                    <option value="">Select a category</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name_np }} ({{ cat.name_en }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" name="title" id="title" 
+                       placeholder="Brief title of your complaint">
+            </div>
+            
+            <div class="form-group">
+                <label>Description <span style="color: red;">*</span></label>
+                <textarea class="form-control" name="description" id="description" 
+                          rows="5" placeholder="Describe your issue in detail" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" class="form-control" name="location_text" id="locationText" 
+                       placeholder="Ward number, area, or landmark">
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+                <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="getLocation()">
+                    <i class="fas fa-map-marker-alt"></i> Use My Current Location
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label>Upload Image (Optional)</label>
+                <input type="file" class="form-control" name="image" id="image" accept="image/*">
+            </div>
+            
+            <div class="form-group">
+                <label>Voice Note (Optional)</label>
+                <input type="file" class="form-control" name="voice_note" id="voiceNote" accept="audio/*">
+                <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="startRecording()">
+                    <i class="fas fa-microphone"></i> <span id="recordingText">Record Voice Note</span>
+                </button>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Submit Complaint
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/offline.js' %}"></script>
+<script>
+    // Get current location
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
+                alert('Location captured successfully!');
+            }, function(error) {
+                alert('Error getting location: ' + error.message);
+            });
+        } else {
+            alert('Geolocation is not supported by your browser');
+        }
+    }
+    
+    // Voice recording
+    let mediaRecorder;
+    let audioChunks = [];
+    
+    function startRecording() {
+        const recordButton = document.getElementById('recordingText');
+        
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            recordButton.textContent = 'Record Voice Note';
+            return;
+        }
+        
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    audioChunks.push(event.data);
+                });
+                
+                mediaRecorder.addEventListener('stop', () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioFile = new File([audioBlob], 'voice_note.wav', { type: 'audio/wav' });
+                    
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(audioFile);
+                    document.getElementById('voiceNote').files = dataTransfer.files;
+                    
+                    alert('Voice note recorded successfully!');
+                    stream.getTracks().forEach(track => track.stop());
+                });
+                
+                mediaRecorder.start();
+                recordButton.textContent = 'Stop Recording';
+            })
+            .catch(error => {
+                alert('Error accessing microphone: ' + error.message);
+            });
+    }
+</script>
+{% endblock %}
